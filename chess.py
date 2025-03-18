@@ -329,36 +329,58 @@ class Tank(Piece):
 
 
 class DancingKnight(Piece):
-    """Класс, представляющий танцующего коня (нестандартная фигура)."""
+    """
+    Класс, представляющий фигуру "Танцующий рыцарь".
 
+    Танцующий рыцарь двигается сначала как конь, а затем, если это возможно, делает дополнительный шаг, 
+    как король (на одну клетку в любом направлении).
+    """
+    
     def can_move(self, board: 'Board', start: Tuple[int, int], end: Tuple[int, int]) -> bool:
-        """Проверяет, может ли танцующий конь переместиться на указанную позицию.
+        """
+        Проверяет, может ли фигура переместиться из начальной позиции в конечную.
 
-        Аргументы:
-            board (Board): Доска, на которой происходит игра.
-            start (Tuple[int, int]): Начальная позиция танцующего коня (строка, столбец).
-            end (Tuple[int, int]): Конечная позиция танцующего коня (строка, столбец).
+        Сначала выполняется ход конем (L-образное движение), затем проверяется возможность 
+        дополнительного хода на одну клетку в любом направлении.
 
-        Возвращает:
+        Args:
+            board (Board): Игровая доска.
+            start (Tuple[int, int]): Координаты начальной позиции (строка, колонка).
+            end (Tuple[int, int]): Координаты конечной позиции (строка, колонка).
+
+        Returns:
             bool: True, если ход возможен, иначе False.
         """
         start_row, start_col = start
         end_row, end_col = end
 
-        if abs(start_row - end_row) * abs(start_col - end_col) != 2:
+        if (abs(start_row - end_row), abs(start_col - end_col)) not in [(2, 1), (1, 2)]:
+            return False
+
+        target_piece = board.get_piece(end)
+        if target_piece is not None and target_piece.color == self.color:
             return False
 
         for dr in [-1, 0, 1]:
             for dc in [-1, 0, 1]:
                 if dr == 0 and dc == 0:
-                    continue 
+                    continue  
                 new_row, new_col = end_row + dr, end_col + dc
                 if 0 <= new_row < 8 and 0 <= new_col < 8:
                     target_piece = board.get_piece((new_row, new_col))
                     if target_piece is None or target_piece.color != self.color:
-                        return True
+                        return True  
 
         return False 
+    
+    def get_symbol(self) -> str:
+        """
+        Возвращает символ, обозначающий фигуру на доске.
+
+        Returns:
+            str: Символ 'H'.
+        """
+        return 'H'
 
     def get_symbol(self) -> str:
         """Возвращает символ танцующего коня.
@@ -438,24 +460,53 @@ class Board:
         row, col = position
         self.board[row][col] = piece
 
-    def move_piece(self, start, end) -> bool:
-        """Перемещает фигуру с начальной позиции на конечную.
-
-        Аргументы:
-            start (Tuple[int, int]): Начальная позиция фигуры (строка, столбец).
-            end (Tuple[int, int]): Конечная позиция фигуры (строка, столбец).
-
-        Возвращает:
-            bool: True, если перемещение успешно, иначе False.
+    def move_piece(self, start: Tuple[int, int], end: Tuple[int, int]) -> bool:
         """
-        if start is None or end is None:
-            return False
+        Перемещает фигуру с одной позиции на другую.
         
+        Если перемещаемая фигура — Танцующий рыцарь, он сначала двигается как конь,
+        а затем, если возможно, делает дополнительный ход как король.
+        
+        Args:
+            start (Tuple[int, int]): Координаты начальной позиции (строка, колонка).
+            end (Tuple[int, int]): Координаты конечной позиции (строка, колонка).
+        
+        Returns:
+            bool: True, если ход выполнен успешно, иначе False.
+        """
         piece = self.get_piece(start)
         if piece is None or not piece.can_move(self, start, end):
             return False
-        self.board[end[0]][end[1]] = piece
-        self.board[start[0]][start[1]] = None
+
+        if isinstance(piece, DancingKnight):
+            self.board[end[0]][end[1]] = piece
+            self.board[start[0]][start[1]] = None
+
+            second_move_made = False
+            for dr in [-1, 0, 1]:
+                for dc in [-1, 0, 1]:
+                    if dr == 0 and dc == 0:
+                        continue
+                    new_row, new_col = end[0] + dr, end[1] + dc
+                    if 0 <= new_row < 8 and 0 <= new_col < 8:
+                        target_piece = self.get_piece((new_row, new_col))
+                        if target_piece is None or target_piece.color != piece.color:
+                            self.board[new_row][new_col] = piece
+                            self.board[end[0]][end[1]] = None
+                            second_move_made = True
+                            break
+                if second_move_made:
+                    break
+
+            if not second_move_made:
+                self.board[start[0]][start[1]] = piece
+                self.board[end[0]][end[1]] = None
+                return False
+
+        else:
+            self.board[end[0]][end[1]] = piece
+            self.board[start[0]][start[1]] = None
+
         return True
 
     def is_check(self, color: str) -> bool:

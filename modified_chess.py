@@ -10,34 +10,15 @@ def main():
     current_player = 'white'
     move_counter = 0
 
-    # Расстановка пешек
-    for col in range(8):
-        board.set_piece((1, col), chess.Pawn('black'))
-        board.set_piece((6, col), chess.Pawn('white'))
-
-    # Расстановка ладей и танцующих коней
-    board.set_piece((0, 0), chess.Rook('black'))
     board.set_piece((0, 7), chess.DancingKnight('black'))
-    board.set_piece((7, 7), chess.Rook('white'))
     board.set_piece((7, 0), chess.DancingKnight('white'))
 
-    # Расстановка драконов и коней
     board.set_piece((0, 1), chess.Dragon('black'))
-    board.set_piece((0, 6), chess.Knight('black'))
-    board.set_piece((7, 1), chess.Knight('white'))
     board.set_piece((7, 6), chess.Dragon('white'))
 
-    # Расстановка слонов и танков
-    board.set_piece((0, 2), chess.Bishop('black'))
     board.set_piece((0, 5), chess.Tank('black'))
-    board.set_piece((7, 5), chess.Bishop('white'))
     board.set_piece((7, 2), chess.Tank('white'))
 
-    # Расстановка ферзей
-    board.set_piece((0, 3), chess.Queen('black'))
-    board.set_piece((7, 3), chess.Queen('white'))
-
-    # Расстановка королей
     board.set_piece((0, 4), chess.King('black'))
     board.set_piece((7, 4), chess.King('white'))
 
@@ -62,7 +43,6 @@ def main():
                 return (y, x)
             return None
         
-        # Ввод координат для хода
         start_pos = interpretator(input('Введите координату фигуры, которой хотите воспользоваться (например, a2): '))
         end_pos = interpretator(input('Введите координату, куда хотите ее передвинуть (например, a4): '))
         
@@ -79,19 +59,15 @@ def main():
             print("Невозможно выполнить ход.")
             continue
 
-        # Отображение доски после хода
         print("\nДоска после хода:")
         print(board)
         
-        # Проверка на шах
         opponent = 'black' if current_player == 'white' else 'white'
         if board.is_check(opponent):
             print(f"Король {'черных' if opponent == 'black' else 'белых'} под шахом!")
 
-        # Смена игрока
         current_player = 'black' if current_player == 'white' else 'white'
         
-        # Увеличение счетчика ходов
         move_counter += 1
         print(f'Количество ходов: {move_counter}')
 
