@@ -21,7 +21,10 @@ def main():
 
     board.set_piece((0, 4), chess.King('black'))
     board.set_piece((7, 4), chess.King('white'))
-
+    
+    board.set_piece((5, 5), chess.Pawn('black'))
+    board.set_piece((3, 3), chess.Pawn('white'))
+    
     print("Кастомная расстановка:")
     print(board)
 
