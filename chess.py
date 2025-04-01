@@ -292,7 +292,12 @@ class Dragon(Piece):
 
 
 class Tank(Piece):
-    """Класс, представляющий танк (нестандартная фигура)."""
+    """
+    Класс, представляющий танк (нестандартная фигура).
+    
+    Танк двигается как пешка (только вперед на одну клетку), но может есть горизонтально (производит так называемый выстрел) 
+    и перемещается на клетку, где стояла съеденная фигура.
+    """
 
     def can_move(self, board: 'Board', start: Tuple[int, int], end: Tuple[int, int]) -> bool:
         """Проверяет, может ли танк переместиться на указанную позицию.
@@ -308,14 +313,15 @@ class Tank(Piece):
         start_row, start_col = start
         end_row, end_col = end
 
-        if start_col != end_col:
-            return False 
-        if abs(start_row - end_row) != 1:
-            return False
-
         target_piece = board.get_piece(end)
         if target_piece is not None and target_piece.color != self.color:
             return True
+
+        if start_col != end_col:
+            return False
+         
+        if abs(start_row - end_row) != 1:
+            return False
 
         return board.get_piece(end) is None
 
